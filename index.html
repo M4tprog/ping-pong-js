@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong</title>
+    <style>
+        * {
+            margin: 0;
+            border: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas>
+        <script>
+            const canvasElement = document.querySelector('canvas');
+            const canvasContext = canvasElement.getContext('2d');
+
+            const lineWidth = 15;
+            const gapX = 10;
+
+            const mouse = {
+                x: 0,
+                y: 0,
+            }
+
+            const field = {
+                w: window.innerWidth,
+                h: window.innerHeight,
+                draw: function () {
+                    canvasContext.fillStyle = '#286047';
+                    canvasContext.fillRect(0, 0, this.w, this.h);
+                }
+            }
+
+            const line = {
+                w: 15,
+                h: field.h,
+                draw: function () {
+                    canvasContext.fillStyle = '#fff';
+                    canvasContext.fillRect(field.w / 2 - this.w / 2, 0, this.w, this.h);
+                }
+            }
+
+            const leftPaddle = {
+                x: gapX,
+                y: 0,
+                w: line.w,
+                h: 200,
+                _move: function () {
+                    this.y = mouse.y - this.h / 2;
+                },
+                draw: function () {
+                    canvasContext.fillRect(this.x, this.y, this.w, this.h);
+                    this._move();
+                }
+            }
+
+            const rightPaddle = {
+                x: field.w - line.w - gapX,
+                y: 600,
+                w: line.w,
+                h: 200,
+                _move: function () {
+                    this.y = ball.y;
+                },
+                draw: function () {
+                    canvasContext.fillRect(this.x, this.y, this.w, this.h);
+                    this._move();
+                }
+            }
+
+            const score = {
+                human: 1,
+                computer: 2,
+                xr: field.w / 4,
+                xl: field.w / 4 + field.w / 2,
+                y: 50,
+                draw: function () {
+                    canvasContext.font = 'bold 72px Arial';
+                    canvasContext.textAlign = 'center';
+                    canvasContext.textBaseline = 'top';
+                    canvasContext.fillStyle = '#01341D';
+                    canvasContext.fillText(this.human, this.xr, this.y);
+                    canvasContext.fillText(this.computer, this.xl, this.y);
+                }
+            }
+
+            const ball = {
+                x: 400,
+                y: 400,
+                r: 20,
+                speed: 3,
+                directionX: 1,
+                directionY: 1,
+                _calcPosition: function () {
+                    if (
+                        (this.y > field.h - this.r && this.directionY > 0) || (this.y - this.r < 0 && this.directionY < 0)
+                    ) {
+                        this._reverseY();
+                    }
+                },
+                _reverseY: function () {
+                    this.directionY *= -1;
+                },
+                _reverseX: function () {
+                    this.directionX *= -1;
+                },
+                _move: function () {
+                    this.x += this.directionX * this.speed;
+                    this.y += this.directionY * this.speed;
+                },
+                draw: function () {
+                    canvasContext.fillStyle = '#fff';
+                    canvasContext.beginPath();
+                    canvasContext.arc(this.x, this.y, this.r, 0, 2 * Math.PI, false);
+                    canvasContext.fill();
+
+                    this._calcPosition();
+                    this._move();
+                },
+            }
+
+
+            function setup() {
+                canvasElement.width = canvasContext.width = field.w;
+                canvasElement.height = canvasContext.height = field.h;
+            }
+
+            function draw() {
+
+                //field
+                field.draw();
+
+                //line
+                line.draw();
+
+                //left paddle
+                leftPaddle.draw();
+
+                //right paddle
+                rightPaddle.draw();
+
+                //score
+                score.draw();
+
+                //ball
+                ball.draw();
+
+            }
+
+            window.animateFrame = (function () {
+                return (
+                    window.requestAnimationFrame ||
+                    window.webkitRequestAnimationFrame ||
+                    window.mozRequestAnimationFrame ||
+                    window.oRequestAnimationFrame ||
+                    window.msRequestAnimationFrame ||
+                    function (callback) {
+                        return window.setTimeout(callback, 1000 / 60)
+                    }
+                )
+            })()
+
+            function main() {
+                animateFrame(main);
+                draw();
+            }
+
+            setup();
+            main();
+
+            canvasElement.addEventListener('mousemove', function (e) {
+                mouse.x = e.pageX;
+                mouse.y = e.pageY;
+
+                console.log(mouse);
+            })
+        </script>
+    </canvas>
+</body>
+
+</html>
